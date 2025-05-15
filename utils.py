@@ -23,3 +23,26 @@ def load_all_data(train_path: str = 'data/train.csv', test_path: str = 'data/tes
     all_data = pl.concat([train, test], how='vertical')
 
     return all_data
+
+
+def add_bmi(all_data: pl.DataFrame) -> pl.DataFrame:
+    """Adds a new column to the full dataframe with the BMI of each participant. Returns a new dataframe (couldn't get in-place to work).
+
+    all_data is expected to have a 'Height' column representing the height in cm and a 'Weight' column representing the weight in kg.
+
+    Args:
+        all_data (pl.DataFrame): dataframe containing train and test data
+
+    Returns:
+        pl.DataFrame: dataframe with a new column 'bmi' representing the BMI of each participant
+    """
+    # create new height metric in meters
+    all_data = all_data.with_columns(height_meters = pl.col('Height') / 100)
+
+    # compute bmi
+    all_data = all_data.with_columns(bmi = pl.col('Weight') / (pl.col('height_meters') ** 2))
+
+    # drop the height_meters column
+    all_data = all_data.drop('height_meters')
+
+    return all_data
