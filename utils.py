@@ -46,3 +46,40 @@ def add_bmi(all_data: pl.DataFrame) -> pl.DataFrame:
     all_data = all_data.drop('height_meters')
 
     return all_data
+
+
+def linearize_body_temp(all_data: pl.DataFrame) -> pl.DataFrame:
+    """Linearizes body temperature with respect to calories by taking the exponential of the body temperature. Drops the original Body_Temp column.
+
+    Args:
+        all_data (pl.DataFrame): dataframe containing train and test data
+
+    Returns:
+        pl.DataFrame: dataframe with a new column 'exp_Body_Temp' representing the exp(body temperature) of each participant
+    """
+    all_data = all_data.with_columns(exp_Body_Temp=pl.col('Body_Temp').exp())
+    
+    all_data = all_data.drop('Body_Temp')
+
+    return all_data
+
+
+def load_and_process_data(linearize_body_temp = False) -> pl.DataFrame:
+    """Master function to load an perform all major data processing steps.
+
+    Returns:
+        pl.DataFrame: _description_
+    """
+
+    all_data = load_all_data()
+
+    all_data = add_bmi(all_data)
+
+    if linearize_body_temp:
+        # only really necessary if you're doing linear regression. This causes problems with numerical stability due to very extreme values which breaks the model, though
+        all_data = linearize_body_temp(all_data)
+
+    # convert string categorical column 'Sex' to 2 binary one-hot encoded columns
+    all_data.to_dummies('Sex')
+
+    return all_data
