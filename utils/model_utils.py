@@ -1,6 +1,10 @@
 import numpy as np
 import optuna
 import polars as pl
+import time
+import matplotlib.pyplot as plt
+import seaborn as sns
+from typing import Union
 
 from xgboost import XGBRegressor
 
@@ -24,6 +28,42 @@ def regression_report(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     report['MAE'] = mean_absolute_error(y_true, y_pred)
     report['RMSE'] = root_mean_squared_error(y_true, y_pred)
     report['RMSLE'] = root_mean_squared_log_error(y_true, y_pred)
+
+    return report
+
+
+def fit_and_plot_regression_model(model, model_name: str, X: Union[pl.DataFrame, np.ndarray], y: np.ndarray, target_name: str = 'Calories_Expended') -> dict:
+    """Fit a regression model and plot the predictions against the true values.
+
+    Args:
+        model: the model. Should implement a fit method and a predict method.
+        model_name (str): the name of the model. Used for printing and plotting.
+        X (Union[pl.DataFrame, np.ndarray]): input features.
+        y (np.ndarray): target vector. Should be a 1D array.
+        target_name (str, optional): the name of te target. Used for plotting. Defaults to 'Calories_Expended'.
+
+    Returns:
+        dict: a dictionary containing regression metrics.   
+    """
+    print('-'*50)
+    print(f"Cross-validating and making predictions with {model_name}...")
+
+    start = time.time()
+    y_train_pred = cross_val_predict(model, X, y, cv=5, n_jobs=-1)
+
+    print(f'Time taken: {round(time.time() - start, 2)} seconds')
+    report = regression_report(y, y_train_pred)
+
+    for metric_name, metric_value in report.items():
+        print(f"{metric_name}: {round(metric_value, 5)}")
+    
+    # plot the predictions
+    plt.figure(figsize=(8, 6))
+    sns.jointplot(x=y, y=y_train_pred, kind='hist')
+    plt.xlabel(f'True {target_name}')
+    plt.ylabel(f'Predicted {target_name}')
+    plt.suptitle(f'{model_name} {target_name} Predictions vs True Values', y=1.02)
+    plt.show()
 
     return report
 
