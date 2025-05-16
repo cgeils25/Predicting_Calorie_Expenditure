@@ -82,7 +82,7 @@ def load_and_process_data(train_path: str = 'data/train.csv', test_path: str = '
         all_data = linearize_body_temp(all_data)
 
     # convert string categorical column 'Sex' to a binary one-hot encoded column
-    all_data = all_data.with_columns(Sex_encoded = pl.col('Sex').map_elements(lambda sex_str: SEX_TO_BINARY[sex_str], return_dtype=pl.Int8))
+    all_data = all_data.with_columns(Sex_encoded = pl.col('Sex').replace_strict(SEX_TO_BINARY)) # polars says this is more efficient than map_elements
     all_data.drop_in_place('Sex')
 
     return all_data
