@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error, root_mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error, root_mean_squared_error, root_mean_squared_log_error
 
 def regression_report(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """Report regression metrics.
@@ -17,5 +17,6 @@ def regression_report(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     report['MSE'] = mean_squared_error(y_true, y_pred)
     report['MAE'] = mean_absolute_error(y_true, y_pred)
     report['RMSE'] = root_mean_squared_error(y_true, y_pred)
+    report['RMSLE'] = root_mean_squared_log_error(y_true, y_pred)
 
     return report
