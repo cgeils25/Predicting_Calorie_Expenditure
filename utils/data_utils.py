@@ -1,5 +1,7 @@
 import polars as pl
 
+SEX_TO_BINARY = {'male': 0, 'female': 1}
+
 def load_all_data(train_path: str = 'data/train.csv', test_path: str = 'data/test.csv') -> pl.DataFrame:
     """
     Load the full train and test datasets for calorie expenditure prediction, and return a single dataframe containing both.
@@ -65,7 +67,7 @@ def linearize_body_temp(all_data: pl.DataFrame) -> pl.DataFrame:
 
 
 def load_and_process_data(train_path: str = 'data/train.csv', test_path: str = 'data/test.csv', linearize_body_temp: bool = False) -> pl.DataFrame:
-    """Pipeline to load an perform all major data processing steps.
+    """Pipeline to load and perform all major data processing steps.
 
     Returns:
         pl.DataFrame: dataframe with all the data and features needed for training and testing
@@ -79,7 +81,8 @@ def load_and_process_data(train_path: str = 'data/train.csv', test_path: str = '
         # only really necessary if you're doing linear regression. This causes problems with numerical stability due to very extreme values which breaks the model, though
         all_data = linearize_body_temp(all_data)
 
-    # convert string categorical column 'Sex' to 2 binary one-hot encoded columns
-    all_data.to_dummies('Sex')
+    # convert string categorical column 'Sex' to a binary one-hot encoded column
+    all_data = all_data.with_columns(Sex_encoded = pl.col('Sex').map_elements(lambda sex_str: SEX_TO_BINARY[sex_str], return_dtype=pl.Int8))
+    all_data.drop_in_place('Sex')
 
     return all_data
