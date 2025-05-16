@@ -64,14 +64,14 @@ def linearize_body_temp(all_data: pl.DataFrame) -> pl.DataFrame:
     return all_data
 
 
-def load_and_process_data(linearize_body_temp = False) -> pl.DataFrame:
+def load_and_process_data(train_path: str = 'data/train.csv', test_path: str = 'data/test.csv', linearize_body_temp: bool = False) -> pl.DataFrame:
     """Pipeline to load an perform all major data processing steps.
 
     Returns:
         pl.DataFrame: dataframe with all the data and features needed for training and testing
     """
 
-    all_data = load_all_data()
+    all_data = load_all_data(train_path, test_path)
 
     all_data = add_bmi(all_data)
 
