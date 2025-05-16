@@ -65,10 +65,10 @@ def linearize_body_temp(all_data: pl.DataFrame) -> pl.DataFrame:
 
 
 def load_and_process_data(linearize_body_temp = False) -> pl.DataFrame:
-    """Master function to load an perform all major data processing steps.
+    """Pipeline to load an perform all major data processing steps.
 
     Returns:
-        pl.DataFrame: _description_
+        pl.DataFrame: dataframe with all the data and features needed for training and testing
     """
 
     all_data = load_all_data()
