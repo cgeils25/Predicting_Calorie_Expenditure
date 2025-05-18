@@ -62,6 +62,9 @@ def cross_validate_and_plot_regression_model(model, model_name: str, X: Union[pl
     # plot the predictions
     plt.figure(figsize=(8, 6))
     sns.jointplot(x=y, y=y_train_pred, kind='hist')
+
+    true_line_values = np.linspace(y.min(), y.max(), 100)
+    plt.plot(true_line_values, true_line_values, color='black', linestyle='--', linewidth=1)   
     plt.xlabel(f'True {target_name}')
     plt.ylabel(f'Predicted {target_name}')
     plt.suptitle(f'{model_name} {target_name} Predictions vs True Values', y=1.02)
