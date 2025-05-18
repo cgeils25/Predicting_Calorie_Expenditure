@@ -27,13 +27,14 @@ def regression_report(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     report['MSE'] = mean_squared_error(y_true, y_pred)
     report['MAE'] = mean_absolute_error(y_true, y_pred)
     report['RMSE'] = root_mean_squared_error(y_true, y_pred)
-    report['RMSLE'] = root_mean_squared_log_error(y_true, y_pred)
+    report['RMSLE'] = root_mean_squared_log_error(y_true, np.clip(y_pred, 0, None)) # clip to avoid log(0) error
 
     return report
 
 
-def fit_and_plot_regression_model(model, model_name: str, X: Union[pl.DataFrame, np.ndarray], y: np.ndarray, target_name: str = 'Calories_Expended') -> dict:
-    """Fit a regression model and plot the predictions against the true values.
+def cross_validate_and_plot_regression_model(model, model_name: str, X: Union[pl.DataFrame, np.ndarray], y: np.ndarray, 
+                                             target_name: str = 'Calories_Expended', cv: int = 5, n_jobs: int = -1) -> dict:
+    """Obtain cross-validated predictions for a regression model and plot the predictions against the true values.
 
     Args:
         model: the model. Should implement a fit method and a predict method.
@@ -41,6 +42,8 @@ def fit_and_plot_regression_model(model, model_name: str, X: Union[pl.DataFrame,
         X (Union[pl.DataFrame, np.ndarray]): input features.
         y (np.ndarray): target vector. Should be a 1D array.
         target_name (str, optional): the name of te target. Used for plotting. Defaults to 'Calories_Expended'.
+        cv (int, optional): number of k-fold cross-validation folds. Defaults to 5.
+        n_jobs (int, optional): number of cpu cores to use. Defaults to -1 (all cores).
 
     Returns:
         dict: a dictionary containing regression metrics.   
@@ -49,8 +52,7 @@ def fit_and_plot_regression_model(model, model_name: str, X: Union[pl.DataFrame,
     print(f"Cross-validating and making predictions with {model_name}...")
 
     start = time.time()
-    y_train_pred = cross_val_predict(model, X, y, cv=5, n_jobs=-1)
-
+    y_train_pred = cross_val_predict(model, X, y, cv=cv, n_jobs=n_jobs)
     print(f'Time taken: {round(time.time() - start, 2)} seconds')
     report = regression_report(y, y_train_pred)
 
