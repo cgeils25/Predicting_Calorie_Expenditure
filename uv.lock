@@ -1007,6 +1007,15 @@ wheels = [
 ]
 
 [[package]]
+name = "neattime"
+version = "0.0.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/81/1a6d7e417927383ab307b0813c4f345e9c891c947f8a22a052b24eb7b75c/neattime-0.0.4.tar.gz", hash = "sha256:ff170e83ec5a39cc7f5aca2b1009e50661c20c4e639ca92452b19959aeb75b83", size = 2000 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/2c/22c1c820ba9b08de42c3b5aa424853e2278ac64bbfb04bb2b99c8a36088c/neattime-0.0.4-py3-none-any.whl", hash = "sha256:e87f56a6ac0da94dac2e03a397edb500a529b6620c822d1356196af980fe19ed", size = 2702 },
+]
+
+[[package]]
 name = "nest-asyncio"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1387,6 +1396,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "jupyter" },
     { name = "matplotlib" },
+    { name = "neattime" },
     { name = "numpy" },
     { name = "optuna" },
     { name = "polars" },
@@ -1401,6 +1411,7 @@ dependencies = [
 requires-dist = [
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.10.3" },
+    { name = "neattime", specifier = ">=0.0.4" },
     { name = "numpy", specifier = ">=2.2.5" },
     { name = "optuna", specifier = ">=4.3.0" },
     { name = "polars", specifier = ">=1.29.0" },
