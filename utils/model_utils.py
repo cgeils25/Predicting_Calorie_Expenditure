@@ -4,7 +4,7 @@ import polars as pl
 import time
 import matplotlib.pyplot as plt
 import seaborn as sns
-from typing import Union
+from typing import Union, List
 
 from xgboost import XGBRegressor
 
@@ -71,6 +71,53 @@ def cross_validate_and_plot_regression_model(model, model_name: str, X: Union[pl
     plt.show()
 
     return report
+
+
+def evaluate_regression_model_performance_by_group(data: pl.DataFrame, 
+                                        group_columns: Union[str, List[str]],
+                                        target_column: str, 
+                                        prediction_column: str, 
+                                        model_name: str):
+    """Evaluate the performance of a regression model by splitting the data by a categorical variable and calculating error metrics. 
+    Then make a regression plot with colors based on the grouping column.
+
+    Args:
+        data (pl.DataFrame): 
+        group_columns (Union[str, List[str]]): column(s) to group by. Can be a single column name or a list of column names. Expected to be categorical.
+        target_column (str): name of the target column. Should be a single column name. Expected to be numeric.
+        prediction_column (str): name of the prediction column. Should be a single column name. Expected to be numeric.
+        model_name (str): name of the model. Used for printing and plotting.
+    """
+    if isinstance(group_columns, str):
+        group_columns = [group_columns]
+
+    # add the error values needed in the original data to calculate error metrics by group
+    data_with_error_metrics = data.with_columns(error = (pl.col(target_column) - pl.col(prediction_column)), 
+                                                abs_error = (pl.col(target_column) - pl.col(prediction_column)).abs(),
+                                                squared_error = (pl.col(target_column) - pl.col(prediction_column))**2)\
+                                                .select(pl.col(['error', 'abs_error', 'squared_error'] + group_columns + [target_column] + [prediction_column]))\
+                                                .clone()
+
+
+    for group_column in group_columns:
+        print('-'*100)
+        print(f"Evaluating differences in model performance based on {group_column}")
+
+        # group errors by the split column and calculate some error metrics
+        print(data_with_error_metrics.group_by(group_column).agg(pl.count().alias('Count'), pl.col('error').mean().alias('Mean Error'), 
+                                                                 pl.col('error').std().alias('Error Stdev'), pl.col('abs_error').mean().alias('MAE'), 
+                                                                 pl.col('squared_error').mean().alias('MSE')))
+
+        # plot sex differences in model predictions
+        plt.figure(figsize=(8, 6))
+        sns.jointplot(data=data_with_error_metrics, x=target_column, y=prediction_column, hue=group_column, kind='hist')
+
+        true_line_values = np.linspace(data_with_error_metrics[target_column].min(), data_with_error_metrics[target_column].max(), 100)
+        plt.plot(true_line_values, true_line_values, color='black', linestyle='--', linewidth=1)    
+        plt.xlabel(f'True {target_column}')
+        plt.ylabel(f'Predicted {target_column}')
+        plt.suptitle(f'{model_name} {target_column} Predictions vs True Values, split by {group_column}', y=1.03)
+        plt.show()
 
 
 def objective_xgb_regressor_rmsle(trial: optuna.trial.Trial, X: np.ndarray, y: np.ndarray, n_jobs: int = -1, cv: int = 10) -> float:
